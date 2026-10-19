@@ -77,13 +77,28 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database
+# Render provides DATABASE_URL automatically when a PostgreSQL service is linked.
+# Locally it falls back to SQLite.
+import dj_database_url
+
+DATABASE_URL = os.environ.get('DATABASE_URL')
 DB_PATH = os.environ.get('DB_PATH')
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': Path(DB_PATH) if DB_PATH else BASE_DIR / 'db.sqlite3',
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': Path(DB_PATH) if DB_PATH else BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
