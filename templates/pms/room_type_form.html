@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Room Category{% endblock %}
+{% block page_title %}Edit Room Category{% endblock %}
+{% block page_subtitle %}Update nightly rate, capacity, and amenities for {{ room_type.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card-modern">
+            <div class="card-header">
+                <span class="fw-semibold"><i class="bi bi-pencil-square text-primary me-2"></i>Update Room Category</span>
+                <a href="{% url 'room_type_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Types
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Category Name <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-secondary">Code <span class="text-danger">*</span></label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                            <div class="text-danger small mt-1">{{ form.code.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-secondary">Base Rate ($) <span class="text-danger">*</span></label>
+                            {{ form.base_rate }}
+                            {% if form.base_rate.errors %}
+                            <div class="text-danger small mt-1">{{ form.base_rate.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Max Occupancy (Persons) <span class="text-danger">*</span></label>
+                        {{ form.max_occupancy }}
+                        {% if form.max_occupancy.errors %}
+                        <div class="text-danger small mt-1">{{ form.max_occupancy.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Amenities</label>
+                        {{ form.amenities }}
+                        {% if form.amenities.errors %}
+                        <div class="text-danger small mt-1">{{ form.amenities.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small text-secondary">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'room_type_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-check-circle-fill"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

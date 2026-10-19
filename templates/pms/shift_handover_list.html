@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Shift Handover Log{% endblock %}
+{% block page_title %}Front Office Shift Handover{% endblock %}
+{% block page_subtitle %}Record important events, cash drawer counts, and unresolved operational tasks for the next shift{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Shift Log History -->
+    <div class="col-lg-7">
+        <div class="card-modern">
+            <div class="card-header">
+                <span class="fw-semibold"><i class="bi bi-journal-text text-primary me-2"></i>Shift Handover History</span>
+                <span class="badge bg-light text-dark border">{{ handovers.count }} Records</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for ho in handovers %}
+                    <div class="list-group-item p-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div>
+                                <span class="badge bg-dark text-warning fs-6">{{ ho.get_shift_display }}</span>
+                                <span class="fw-semibold text-dark ms-2">{{ ho.date|date:"F d, Y" }}</span>
+                            </div>
+                            <span class="badge bg-success-subtle text-success fs-6">
+                                Drawer: ${{ ho.cash_in_drawer }}
+                            </span>
+                        </div>
+
+                        <div class="mb-2 small text-secondary">
+                            <strong class="text-dark">Shift Notes:</strong>
+                            <div class="p-2 bg-light rounded border mt-1">{{ ho.notes|linebreaksbr }}</div>
+                        </div>
+
+                        {% if ho.pending_matters %}
+                        <div class="mb-2 small text-danger">
+                            <strong class="text-dark">Pending Matters for Next Shift:</strong>
+                            <div class="p-2 bg-danger-subtle rounded border border-danger mt-1">{{ ho.pending_matters|linebreaksbr }}</div>
+                        </div>
+                        {% endif %}
+
+                        <div class="text-muted small mt-2 d-flex justify-content-between" style="font-size: 0.75rem;">
+                            <span>Handed over by: <strong>{{ ho.handed_over_by.username|default:"Staff" }}</strong></span>
+                            <span>Recorded at: {{ ho.created_at|date:"H:i" }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="p-4 text-center text-muted">No shift handovers logged yet.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Shift Handover Form -->
+    <div class="col-lg-5">
+        <div class="card-modern">
+            <div class="card-header">
+                <span class="fw-semibold"><i class="bi bi-pencil-square text-primary me-2"></i>Record New Shift Handover</span>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Current Shift <span class="text-danger">*</span></label>
+                        {{ form.shift }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Date <span class="text-danger">*</span></label>
+                        {{ form.date }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Cash Count in Front Desk Drawer ($) <span class="text-danger">*</span></label>
+                        {{ form.cash_in_drawer }}
+                        <div class="form-text small">Enter verified physical cash amount in register.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Key Shift Events & Observations <span class="text-danger">*</span></label>
+                        {{ form.notes }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-danger">Pending Tasks for Incoming Shift <span class="text-danger">*</span></label>
+                        {{ form.pending_matters }}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-circle-fill me-1"></i> Save & Handover Shift
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Reservation {{ reservation.booking_reference }}{% endblock %}
+{% block page_title %}Reservation Voucher{% endblock %}
+{% block page_subtitle %}Booking details, guest verification, and front desk check-in actions{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card-modern">
+            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div>
+                    <span class="fw-bold fs-5 text-dark">{{ reservation.booking_reference }}</span>
+                    <span class="badge bg-{{ reservation.status_badge }} ms-2">{{ reservation.get_status_display }}</span>
+                </div>
+                <div class="d-flex gap-2">
+                    {% if reservation.status == 'CONFIRMED' %}
+                    <a href="{% url 'check_in_reservation' reservation.pk %}" class="btn btn-sm btn-success">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Proceed to Check-In
+                    </a>
+                    <a href="{% url 'reservation_cancel' reservation.pk %}" class="btn btn-sm btn-outline-danger">
+                        Cancel Booking
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'reservation_list' %}" class="btn btn-sm btn-outline-secondary">
+                        Back to List
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Guest Information Box -->
+                <div class="p-3 bg-light rounded border mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="fw-bold text-dark mb-0">Guest Contact & Verification</h6>
+                        <a href="{% url 'guest_detail' reservation.guest.pk %}" class="small text-decoration-none">View Profile &rarr;</a>
+                    </div>
+                    <div class="row g-2 small">
+                        <div class="col-md-6">
+                            <strong>Name:</strong> {{ reservation.guest.full_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Phone:</strong> {{ reservation.guest.phone }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Email:</strong> {{ reservation.guest.email|default:"Not Provided" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Nationality:</strong> {{ reservation.guest.nationality }}
+                        </div>
+                        <div class="col-12">
+                            <strong>ID Document:</strong> {{ reservation.guest.get_id_type_display }} ({{ reservation.guest.masked_id }})
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stay Details -->
+                <h6 class="fw-bold text-dark mb-3">Booking Particulars</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6 col-md-3">
+                        <div class="p-2 border rounded text-center bg-white shadow-sm">
+                            <div class="text-muted small" style="font-size: 0.72rem;">Check-In</div>
+                            <div class="fw-bold text-dark">{{ reservation.check_in_date|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="p-2 border rounded text-center bg-white shadow-sm">
+                            <div class="text-muted small" style="font-size: 0.72rem;">Check-Out</div>
+                            <div class="fw-bold text-dark">{{ reservation.check_out_date|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="p-2 border rounded text-center bg-white shadow-sm">
+                            <div class="text-muted small" style="font-size: 0.72rem;">Nights</div>
+                            <div class="fw-bold text-primary">{{ reservation.nights }} night{{ reservation.nights|pluralize }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="p-2 border rounded text-center bg-white shadow-sm">
+                            <div class="text-muted small" style="font-size: 0.72rem;">Occupants</div>
+                            <div class="fw-bold text-dark">{{ reservation.num_adults }} Adult{{ reservation.num_adults|pluralize }}{% if reservation.num_children %}, {{ reservation.num_children }} Child{{ reservation.num_children|pluralize:"ren" }}{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Room & Financials -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded h-100 bg-white">
+                            <div class="text-muted small mb-1">Room Category</div>
+                            <h5 class="fw-bold text-dark mb-1">{{ reservation.room_type.name }} ({{ reservation.room_type.code }})</h5>
+                            <div class="text-secondary small">
+                                Assigned Room:
+                                {% if reservation.assigned_room %}
+                                <strong class="badge bg-primary">Room {{ reservation.assigned_room.room_number }}</strong>
+                                {% else %}
+                                <span class="badge bg-secondary">Unassigned (Assign at Check-in)</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded h-100 bg-white">
+                            <div class="text-muted small mb-1">Estimated Stay Charges</div>
+                            <h4 class="fw-bold text-success mb-1">${{ reservation.estimated_total }}</h4>
+                            <div class="text-muted small">
+                                ${{ reservation.rate_per_night }} / night &times; {{ reservation.nights }} nights (exclusive of incidentals)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if reservation.special_requests %}
+                <div class="alert alert-info small mb-4">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <strong>Special Requests:</strong> {{ reservation.special_requests }}
+                </div>
+                {% endif %}
+
+                <div class="text-muted small pt-3 border-top d-flex justify-content-between">
+                    <span>Booked by: {{ reservation.created_by.username|default:"Front Desk" }} on {{ reservation.created_at|date:"Y-m-d H:i" }}</span>
+                    <span>Status: {{ reservation.get_status_display }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

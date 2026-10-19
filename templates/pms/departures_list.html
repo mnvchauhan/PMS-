@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Departures List{% endblock %}
+{% block page_title %}Scheduled Departures{% endblock %}
+{% block page_subtitle %}Front office check-out queue, room clearance, and cashier settlement{% endblock %}
+
+{% block content %}
+<!-- Date Selection -->
+<div class="card-modern mb-3">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold text-secondary mb-1">Select Departure Date</label>
+                <input type="date" name="date" value="{{ target_date }}" class="form-control" required>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-calendar-event me-1"></i> View Departures
+                </button>
+            </div>
+            <div class="col-md-5 d-flex align-items-end justify-content-md-end gap-2">
+                <a href="{% url 'departures_list' %}?date={{ today|date:'Y-m-d' }}" class="btn btn-outline-secondary">
+                    Today's Departures
+                </a>
+                <a href="{% url 'export_departures_csv' %}" class="btn btn-outline-danger">
+                    <i class="bi bi-download me-1"></i> Export CSV
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Departures Table -->
+<div class="card-modern">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">
+            <i class="bi bi-box-arrow-right text-danger me-2"></i>Departures Due on {{ target_date }} ({{ departures.count }})
+        </span>
+        <a href="{% url 'in_house_list' %}" class="btn btn-sm btn-outline-secondary">
+            View All In-House
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <!-- Desktop Table View -->
+        <div class="table-responsive d-none d-md-block">
+            <table class="table table-modern table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Guest Details</th>
+                        <th>Phone</th>
+                        <th>Check-In Time</th>
+                        <th>Total Folio</th>
+                        <th>Total Paid</th>
+                        <th>Balance Due</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dep in departures %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-danger fs-6">{{ dep.room.room_number }}</span>
+                            <div class="text-muted small" style="font-size: 0.72rem;">{{ dep.room.room_type.code }}</div>
+                        </td>
+                        <td>
+                            <a href="{% url 'guest_detail' dep.guest.pk %}" class="fw-bold text-dark text-decoration-none">
+                                {{ dep.guest.full_name }}
+                            </a>
+                            <div class="text-muted small">{{ dep.guest.nationality }}</div>
+                        </td>
+                        <td class="small">{{ dep.guest.phone }}</td>
+                        <td class="small">{{ dep.check_in_time|date:"M d, H:i" }}</td>
+                        <td><strong class="text-dark">${{ dep.invoice.total_amount }}</strong></td>
+                        <td class="text-success small">${{ dep.invoice.total_paid }}</td>
+                        <td>
+                            <strong class="{% if dep.invoice.balance_due > 0 %}text-danger fs-6{% else %}text-success{% endif %}">
+                                ${{ dep.invoice.balance_due }}
+                            </strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ dep.invoice.status_badge }}">{{ dep.invoice.get_status_display }}</span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'check_out' dep.pk %}" class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1 shadow-sm">
+                                <i class="bi bi-box-arrow-right"></i> Check Out
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <div class="mb-2"><i class="bi bi-check2-circle fs-1 text-success"></i></div>
+                            <h6 class="fw-bold text-dark">No pending departures on {{ target_date }}</h6>
+                            <p class="small text-muted mb-0">All expected departures have been processed or no guests are due to check out.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Card List View -->
+        <div class="d-block d-md-none p-2">
+            {% for dep in departures %}
+            <div class="mobile-record-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-danger fs-6 py-1 px-2">Room {{ dep.room.room_number }}</span>
+                        <div>
+                            <a href="{% url 'guest_detail' dep.guest.pk %}" class="fw-bold text-dark text-decoration-none d-block">
+                                {{ dep.guest.full_name }}
+                            </a>
+                            <span class="text-muted small" style="font-size: 0.75rem;">{{ dep.room.room_type.code }} &bull; {{ dep.guest.phone }}</span>
+                        </div>
+                    </div>
+                    <span class="badge bg-{{ dep.invoice.status_badge }}">{{ dep.invoice.get_status_display }}</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between small text-muted mb-2 border-top pt-2">
+                    <span>Folio Total: <strong>${{ dep.invoice.total_amount }}</strong></span>
+                    <span>Balance Due: <strong class="{% if dep.invoice.balance_due > 0 %}text-danger fs-6{% else %}text-success{% endif %}">${{ dep.invoice.balance_due }}</strong></span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'invoice_detail' dep.invoice.pk %}" class="btn btn-sm btn-outline-primary flex-fill py-1">
+                        <i class="bi bi-receipt me-1"></i> Folio
+                    </a>
+                    <a href="{% url 'check_out' dep.pk %}" class="btn btn-sm btn-danger flex-fill py-1">
+                        <i class="bi bi-box-arrow-right me-1"></i> Check Out
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-check2-circle fs-2 text-success d-block mb-1"></i>
+                <div class="fw-semibold">No pending departures today</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

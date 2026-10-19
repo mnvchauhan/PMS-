@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Guest Service Requests{% endblock %}
+{% block page_title %}Guest Requests & Service Desk{% endblock %}
+{% block page_subtitle %}Track, prioritize, and resolve front desk guest requests, housekeeping supplies, and maintenance tasks{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Active Requests Table -->
+    <div class="col-lg-7">
+        <div class="card-modern">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold"><i class="bi bi-bell-fill text-warning me-2"></i>Service Requests</span>
+                <div class="btn-group btn-group-sm">
+                    <a href="{% url 'guest_request_list' %}" class="btn btn-outline-secondary {% if not selected_status %}active{% endif %}">All</a>
+                    <a href="{% url 'guest_request_list' %}?status=PENDING" class="btn btn-outline-secondary {% if selected_status == 'PENDING' %}active{% endif %}">Pending</a>
+                    <a href="{% url 'guest_request_list' %}?status=IN_PROGRESS" class="btn btn-outline-secondary {% if selected_status == 'IN_PROGRESS' %}active{% endif %}">In Progress</a>
+                    <a href="{% url 'guest_request_list' %}?status=COMPLETED" class="btn btn-outline-secondary {% if selected_status == 'COMPLETED' %}active{% endif %}">Completed</a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Room</th>
+                                <th>Guest</th>
+                                <th>Request Details</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th class="text-end">Update</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in requests %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-danger fs-6">{{ req.room.room_number }}</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ req.guest.full_name }}</div>
+                                    <div class="text-muted small">{{ req.created_at|timesince }} ago</div>
+                                </td>
+                                <td style="max-width: 250px;">
+                                    <span class="small text-secondary">{{ req.request_text }}</span>
+                                </td>
+                                <td>
+                                    {% if req.priority == 'URGENT' %}
+                                    <span class="badge bg-danger">Urgent</span>
+                                    {% elif req.priority == 'HIGH' %}
+                                    <span class="badge bg-warning text-dark">High</span>
+                                    {% else %}
+                                    <span class="badge bg-light text-secondary border">{{ req.get_priority_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if req.status == 'COMPLETED' %}
+                                    <span class="badge bg-success-subtle text-success">Completed</span>
+                                    {% elif req.status == 'IN_PROGRESS' %}
+                                    <span class="badge bg-primary-subtle text-primary">In Progress</span>
+                                    {% elif req.status == 'PENDING' %}
+                                    <span class="badge bg-warning-subtle text-warning">Pending</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary">Cancelled</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if req.status != 'COMPLETED' %}
+                                    <form method="post" action="{% url 'guest_request_update_status' req.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="status" value="COMPLETED">
+                                        <button type="submit" class="btn btn-sm btn-outline-success py-1" title="Mark Done">
+                                            <i class="bi bi-check-lg"></i> Done
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-success small"><i class="bi bi-check-circle-fill"></i></span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">No service requests found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Request Form -->
+    <div class="col-lg-5">
+        <div class="card-modern">
+            <div class="card-header">
+                <span class="fw-semibold"><i class="bi bi-plus-circle text-primary me-2"></i>Log Service Request</span>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Room <span class="text-danger">*</span></label>
+                        {{ form.room }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Guest <span class="text-danger">*</span></label>
+                        {{ form.guest }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Priority</label>
+                        {{ form.priority }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Status</label>
+                        {{ form.status }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Request Details <span class="text-danger">*</span></label>
+                        {{ form.request_text }}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-bell-fill me-1"></i> Submit Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

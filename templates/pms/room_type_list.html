@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Room Types & Rates{% endblock %}
+{% block page_title %}Room Types & Nightly Tariffs{% endblock %}
+{% block page_subtitle %}Manage room categories, base pricing, capacities, and listed amenities{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Room Types List Table -->
+    <div class="col-lg-7">
+        <div class="card-modern">
+            <div class="card-header">
+                <span class="fw-semibold"><i class="bi bi-tags-fill text-primary me-2"></i>Configured Room Categories</span>
+                <span class="badge bg-light text-dark border">{{ room_types.count }} Types</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Category Details</th>
+                                <th>Base Tariff</th>
+                                <th>Max Guests</th>
+                                <th>Total Rooms</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rt in room_types %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ rt.name }}</div>
+                                    <div class="text-muted small">
+                                        <span class="badge bg-light text-secondary border me-1">{{ rt.code }}</span>
+                                        <span>{{ rt.amenities|truncatechars:35|default:"--" }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong class="text-success fs-6">${{ rt.base_rate }}</strong>
+                                    <span class="text-muted small">/night</span>
+                                </td>
+                                <td>{{ rt.max_occupancy }} person{{ rt.max_occupancy|pluralize }}</td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary">{{ rt.room_count }} Rooms</span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'room_type_update' rt.pk %}" class="btn btn-sm btn-light border text-primary" title="Edit Category">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">No room types defined yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Room Type Form -->
+    <div class="col-lg-5">
+        <div class="card-modern">
+            <div class="card-header">
+                <span class="fw-semibold"><i class="bi bi-plus-circle text-primary me-2"></i>Add Room Category</span>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Category Name <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-secondary">Code <span class="text-danger">*</span></label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                            <div class="text-danger small mt-1">{{ form.code.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-secondary">Base Rate ($) <span class="text-danger">*</span></label>
+                            {{ form.base_rate }}
+                            {% if form.base_rate.errors %}
+                            <div class="text-danger small mt-1">{{ form.base_rate.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Max Occupancy (Persons) <span class="text-danger">*</span></label>
+                        {{ form.max_occupancy }}
+                        {% if form.max_occupancy.errors %}
+                        <div class="text-danger small mt-1">{{ form.max_occupancy.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Amenities</label>
+                        {{ form.amenities }}
+                        {% if form.amenities.errors %}
+                        <div class="text-danger small mt-1">{{ form.amenities.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-secondary">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-1">
+                        <i class="bi bi-check-circle-fill"></i> Save Category & Rate
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

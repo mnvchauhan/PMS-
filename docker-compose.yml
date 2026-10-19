@@ -1,0 +1,22 @@
+services:
+  web:
+    build: .
+    container_name: hotel_pms
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_DEBUG=False
+      - ALLOWED_HOSTS=*
+      - SECRET_KEY=grand-horizon-pms-production-key-vps-9921
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+      - DB_PATH=/app/data/db.sqlite3
+      - SEED_DATA=true
+      - GUNICORN_WORKERS=3
+    volumes:
+      # Persistent SQLite database volume (data survives updates & restarts)
+      - pms_data:/app/data
+
+volumes:
+  pms_data:
+    driver: local

@@ -1,0 +1,270 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Grand Horizon Hotel{% endblock %} | Front Office PMS</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <div class="app-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand-box justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="brand-logo">
+                        <i class="bi bi-buildings-fill"></i>
+                    </div>
+                    <div>
+                        <div class="brand-text">Grand Horizon</div>
+                        <div class="brand-sub">Front Office PMS</div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm text-secondary d-lg-none p-1 border-0" id="sidebarCloseBtn" aria-label="Close menu">
+                    <i class="bi bi-x-lg fs-5"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-heading">Front Desk</div>
+                <a href="{% url 'dashboard' %}" class="nav-link-custom {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'room_matrix' %}" class="nav-link-custom {% if request.resolver_match.url_name == 'room_matrix' %}active{% endif %}">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                    <span>Room Rack</span>
+                </a>
+                <a href="{% url 'walk_in_check_in' %}" class="nav-link-custom {% if request.resolver_match.url_name == 'walk_in_check_in' %}active{% endif %}">
+                    <i class="bi bi-person-walking"></i>
+                    <span>Walk-In Check-In</span>
+                </a>
+                <a href="{% url 'arrivals_list' %}" class="nav-link-custom {% if request.resolver_match.url_name == 'arrivals_list' %}active{% endif %}">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Arrivals</span>
+                </a>
+                <a href="{% url 'departures_list' %}" class="nav-link-custom {% if request.resolver_match.url_name == 'departures_list' %}active{% endif %}">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Departures</span>
+                </a>
+                <a href="{% url 'in_house_list' %}" class="nav-link-custom {% if request.resolver_match.url_name == 'in_house_list' %}active{% endif %}">
+                    <i class="bi bi-person-check-fill"></i>
+                    <span>In-House Guests</span>
+                </a>
+
+                <div class="sidebar-heading">Reservations & Guests</div>
+                <a href="{% url 'reservation_list' %}" class="nav-link-custom {% if 'reservation' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    <span>Reservations</span>
+                </a>
+                <a href="{% url 'guest_list' %}" class="nav-link-custom {% if 'guest' in request.resolver_match.url_name and 'request' not in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Guest Directory</span>
+                </a>
+
+                <div class="sidebar-heading">Operations</div>
+                <a href="{% url 'room_list' %}" class="nav-link-custom {% if request.resolver_match.url_name == 'room_list' or request.resolver_match.url_name == 'room_create' or request.resolver_match.url_name == 'room_update' %}active{% endif %}">
+                    <i class="bi bi-door-closed-fill"></i>
+                    <span>Rooms & Status</span>
+                </a>
+                <a href="{% url 'guest_request_list' %}" class="nav-link-custom {% if 'request' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Service Requests</span>
+                </a>
+                <a href="{% url 'shift_handover_list' %}" class="nav-link-custom {% if 'handover' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Shift Handover</span>
+                </a>
+
+                <div class="sidebar-heading">Management & Reports</div>
+                <a href="{% url 'reports' %}" class="nav-link-custom {% if 'report' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <span>Reports & Revenue</span>
+                </a>
+                <a href="{% url 'room_type_list' %}" class="nav-link-custom {% if 'room_type' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-tags-fill"></i>
+                    <span>Room Types & Rates</span>
+                </a>
+                {% if user.is_staff %}
+                <a href="/admin/" target="_blank" class="nav-link-custom">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    <span>Django Admin</span>
+                </a>
+                {% endif %}
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="trainee-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: #d97706;">
+                            {{ user.username|slice:":2"|upper }}
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="text-white text-truncate fw-semibold small" style="max-width: 125px;">
+                                {{ user.get_full_name|default:user.username }}
+                            </div>
+                            <div class="text-warning small" style="font-size: 0.7rem;">
+                                {% if user.is_superuser %}Admin / Manager{% else %}GSA Front Desk{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{% url 'logout' %}" class="text-secondary text-decoration-none" title="Log out">
+                        <i class="bi bi-box-arrow-right fs-5"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggle" type="button">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+                    <div>
+                        <h5 class="mb-0 fw-bold text-dark">{% block page_title %}Front Office Dashboard{% endblock %}</h5>
+                        <small class="text-muted d-none d-sm-inline">{% block page_subtitle %}Guest Service Associates (GSA) Operations Portal{% endblock %}</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{% url 'walk_in_check_in' %}" class="btn btn-sm btn-success d-none d-md-inline-flex align-items-center gap-1 shadow-sm">
+                        <i class="bi bi-person-walking"></i> Walk-In
+                    </a>
+                    <a href="{% url 'reservation_create' %}" class="btn btn-sm btn-primary d-none d-md-inline-flex align-items-center gap-1 shadow-sm">
+                        <i class="bi bi-calendar-plus"></i> New Reservation
+                    </a>
+                    <a href="{% url 'room_matrix' %}" class="btn btn-sm btn-outline-secondary d-none d-md-inline-flex align-items-center gap-1">
+                        <i class="bi bi-grid-3x3-gap"></i> Room Rack
+                    </a>
+
+                    <div class="dropdown">
+                        <button class="btn btn-light btn-sm dropdown-toggle border d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle text-primary"></i>
+                            <span class="d-none d-sm-inline">{{ user.username }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><h6 class="dropdown-header">Front Desk Account</h6></li>
+                            {% if user.is_staff %}
+                            <li><a class="dropdown-item" href="/admin/" target="_blank"><i class="bi bi-gear me-2"></i>Django Admin</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Log Out</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Body -->
+            <main class="page-body">
+                <!-- Messages -->
+                {% if messages %}
+                <div class="mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm" role="alert">
+                        {% if message.tags == 'success' %}
+                            <i class="bi bi-check-circle-fill fs-5"></i>
+                        {% elif message.tags == 'danger' or message.tags == 'error' %}
+                            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="bi bi-exclamation-circle-fill fs-5"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle-fill fs-5"></i>
+                        {% endif %}
+                        <div class="flex-grow-1">{{ message }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar (Sticky for Phones) -->
+    <nav class="mobile-bottom-nav d-lg-none" aria-label="Mobile Navigation">
+        <a href="{% url 'dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{% url 'room_matrix' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'room_matrix' %}active{% endif %}">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
+            <span>Rack</span>
+        </a>
+        <a href="{% url 'walk_in_check_in' %}" class="bottom-nav-item bottom-nav-center {% if request.resolver_match.url_name == 'walk_in_check_in' %}active{% endif %}" title="Walk-In Check In">
+            <div class="nav-center-btn">
+                <i class="bi bi-person-walking"></i>
+            </div>
+            <span>Walk-In</span>
+        </a>
+        <a href="{% url 'in_house_list' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'in_house_list' or request.resolver_match.url_name == 'departures_list' %}active{% endif %}">
+            <i class="bi bi-person-check-fill"></i>
+            <span>In-House</span>
+        </a>
+        <button type="button" class="bottom-nav-item border-0 bg-transparent text-secondary" id="mobileMenuBtn" aria-label="Open Full Menu">
+            <i class="bi bi-list"></i>
+            <span>Menu</span>
+        </button>
+    </nav>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+
+        function openSidebar() {
+            if (sidebar && backdrop) {
+                sidebar.classList.add('show');
+                backdrop.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeSidebar() {
+            if (sidebar && backdrop) {
+                sidebar.classList.remove('show');
+                backdrop.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
+        if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeSidebar);
+        if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+        // Auto close when tapping navigation links on mobile
+        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 992) {
+                    closeSidebar();
+                }
+            });
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Configure physical room number, assigned floor, type category, and initial housekeeping condition{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card-modern">
+            <div class="card-header">
+                <span class="fw-semibold"><i class="bi bi-door-closed text-primary me-2"></i>Room Configuration Form</span>
+                <a href="{% url 'room_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Rooms
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-secondary">Room Number <span class="text-danger">*</span></label>
+                            {{ form.room_number }}
+                            {% if form.room_number.errors %}
+                            <div class="text-danger small mt-1">{{ form.room_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-secondary">Floor <span class="text-danger">*</span></label>
+                            {{ form.floor }}
+                            {% if form.floor.errors %}
+                            <div class="text-danger small mt-1">{{ form.floor.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-secondary">Room Type Category <span class="text-danger">*</span></label>
+                            {{ form.room_type }}
+                            {% if form.room_type.errors %}
+                            <div class="text-danger small mt-1">{{ form.room_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-secondary">Custom Rate ($ / night)</label>
+                            {{ form.current_rate }}
+                            {% if form.current_rate.errors %}
+                            <div class="text-danger small mt-1">{{ form.current_rate.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-text small">Leave blank to inherit the Room Type's base rate.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-secondary">Front Desk Status <span class="text-danger">*</span></label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-secondary">Housekeeping Cleanliness <span class="text-danger">*</span></label>
+                            {{ form.clean_status }}
+                            {% if form.clean_status.errors %}
+                            <div class="text-danger small mt-1">{{ form.clean_status.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small text-secondary">Internal Room Notes</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                            <div class="text-danger small mt-1">{{ form.notes.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'room_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-check-circle-fill"></i> Save Room
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

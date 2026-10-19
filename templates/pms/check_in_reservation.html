@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Check-In {{ reservation.guest.full_name }}{% endblock %}
+{% block page_title %}Front Desk Guest Check-In{% endblock %}
+{% block page_subtitle %}Assign available room, confirm occupants, and activate guest stay folio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card-modern">
+            <div class="card-header">
+                <span class="fw-semibold"><i class="bi bi-box-arrow-in-right text-success me-2"></i>Arrival Check-In Verification</span>
+                <a href="{% url 'arrivals_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Arrivals
+                </a>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Guest & Reservation Summary -->
+                <div class="p-3 bg-light rounded border mb-4">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="text-muted small" style="font-size: 0.72rem;">Guest Full Name</div>
+                            <h5 class="fw-bold text-dark mb-0">{{ reservation.guest.full_name }}</h5>
+                            <div class="text-secondary small">{{ reservation.guest.phone }} &bull; {{ reservation.guest.nationality }}</div>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <span class="badge bg-primary mb-1">{{ reservation.booking_reference }}</span>
+                            <div class="small fw-semibold text-dark">Category: {{ reservation.room_type.name }}</div>
+                            <div class="text-muted small">Stay: {{ reservation.check_in_date|date:"M d" }} - {{ reservation.check_out_date|date:"M d, Y" }} ({{ reservation.nights }} nights)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Check-in Form -->
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold small text-secondary">
+                                Select Available Clean Room ({{ reservation.room_type.code }}) <span class="text-danger">*</span>
+                            </label>
+                            {{ form.room }}
+                            {% if form.room.errors %}
+                            <div class="text-danger small mt-1">{{ form.room.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-text small">Only vacant, inspected rooms are eligible for immediate check-in.</div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold small text-secondary">
+                                Number of Occupants <span class="text-danger">*</span>
+                            </label>
+                            {{ form.num_occupants }}
+                            {% if form.num_occupants.errors %}
+                            <div class="text-danger small mt-1">{{ form.num_occupants.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small text-secondary">Check-In Notes / Key Card Handover Remarks</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                            <div class="text-danger small mt-1">{{ form.notes.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning small mb-4">
+                        <i class="bi bi-info-circle me-1"></i>
+                        <strong>Front Desk Notice:</strong> Confirming check-in will immediately change the room status to <strong>Occupied</strong>, create an active guest stay record, and generate an initial billing invoice for <strong>${{ reservation.estimated_total }}</strong>.
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'reservation_detail' reservation.pk %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success d-inline-flex align-items-center gap-1 shadow-sm">
+                            <i class="bi bi-key-fill"></i> Complete Check-In & Issue Key
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

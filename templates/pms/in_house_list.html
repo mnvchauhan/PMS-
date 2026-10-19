@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}In-House Guests{% endblock %}
+{% block page_title %}In-House Guests Directory{% endblock %}
+{% block page_subtitle %}Live roster of currently resident hotel guests, occupied rooms, folio status, and pending balances{% endblock %}
+
+{% block content %}
+<!-- Search Bar -->
+<div class="card-modern mb-3">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="q" value="{{ search_query }}" class="form-control border-start-0" placeholder="Search in-house guests by guest name, room number, or phone...">
+                </div>
+            </div>
+            <div class="col-md-3 d-flex gap-1">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search me-1"></i> Filter
+                </button>
+                {% if search_query %}
+                <a href="{% url 'in_house_list' %}" class="btn btn-outline-secondary" title="Reset Search">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Header Controls -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="text-muted small">
+        Showing <strong>{{ total_in_house }}</strong> in-house resident{{ total_in_house|pluralize }}
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'departures_list' %}" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1">
+            <i class="bi bi-box-arrow-right"></i> Today's Departures
+        </a>
+        <a href="{% url 'walk_in_check_in' %}" class="btn btn-sm btn-success d-flex align-items-center gap-1">
+            <i class="bi bi-person-walking"></i> Walk-In Check-In
+        </a>
+    </div>
+</div>
+
+<!-- In-House Table Card -->
+<div class="card-modern">
+    <div class="card-body p-0">
+        <!-- Desktop Table View -->
+        <div class="table-responsive d-none d-md-block">
+            <table class="table table-modern table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Guest Name</th>
+                        <th>Phone</th>
+                        <th>Check-In Date/Time</th>
+                        <th>Expected Check-Out</th>
+                        <th>Nights</th>
+                        <th>Total Folio</th>
+                        <th>Balance Due</th>
+                        <th>Folio Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stay in stays %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-danger fs-6">{{ stay.room.room_number }}</span>
+                            <div class="text-muted small" style="font-size: 0.72rem;">{{ stay.room.room_type.code }}</div>
+                        </td>
+                        <td>
+                            <a href="{% url 'guest_detail' stay.guest.pk %}" class="fw-bold text-dark text-decoration-none">
+                                {{ stay.guest.full_name }}
+                            </a>
+                            <div class="text-muted small">{{ stay.guest.nationality }}</div>
+                        </td>
+                        <td class="small">{{ stay.guest.phone }}</td>
+                        <td class="small">{{ stay.check_in_time|date:"M d, H:i" }}</td>
+                        <td>
+                            <span class="{% if stay.is_due_today %}text-danger fw-bold{% else %}text-dark{% endif %} small">
+                                {{ stay.expected_check_out|date:"M d, Y" }}
+                                {% if stay.is_due_today %}
+                                <span class="badge bg-danger ms-1">Due Today</span>
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>{{ stay.nights_count }} nt{{ stay.nights_count|pluralize }}</td>
+                        <td><strong class="text-dark">${{ stay.invoice.total_amount }}</strong></td>
+                        <td>
+                            <strong class="{% if stay.invoice.balance_due > 0 %}text-danger{% else %}text-success{% endif %}">
+                                ${{ stay.invoice.balance_due }}
+                            </strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ stay.invoice.status_badge }}">{{ stay.invoice.get_status_display }}</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'invoice_detail' stay.invoice.pk %}" class="btn btn-outline-primary" title="View & Add Charges">
+                                    <i class="bi bi-receipt"></i> Folio
+                                </a>
+                                <a href="{% url 'check_out' stay.pk %}" class="btn btn-danger" title="Check-Out">
+                                    Check Out
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center py-5 text-muted">
+                            <div class="mb-2"><i class="bi bi-door-closed fs-1"></i></div>
+                            <h6 class="fw-bold text-dark">No active in-house guests</h6>
+                            <p class="small text-muted mb-0">Check in guests from reservations or register walk-in arrivals.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Card List View -->
+        <div class="d-block d-md-none p-2">
+            {% for stay in stays %}
+            <div class="mobile-record-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-danger fs-6 py-1 px-2">Room {{ stay.room.room_number }}</span>
+                        <div>
+                            <a href="{% url 'guest_detail' stay.guest.pk %}" class="fw-bold text-dark text-decoration-none d-block">
+                                {{ stay.guest.full_name }}
+                            </a>
+                            <span class="text-muted small" style="font-size: 0.75rem;">{{ stay.room.room_type.code }} &bull; {{ stay.guest.phone }}</span>
+                        </div>
+                    </div>
+                    <span class="badge bg-{{ stay.invoice.status_badge }}">{{ stay.invoice.get_status_display }}</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between small text-muted mb-2 border-top pt-2">
+                    <span>Dep: <strong class="{% if stay.is_due_today %}text-danger{% else %}text-dark{% endif %}">{{ stay.expected_check_out|date:"M d" }}</strong></span>
+                    <span>Balance: <strong class="{% if stay.invoice.balance_due > 0 %}text-danger fs-6{% else %}text-success{% endif %}">${{ stay.invoice.balance_due }}</strong></span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'invoice_detail' stay.invoice.pk %}" class="btn btn-sm btn-outline-primary flex-fill py-1">
+                        <i class="bi bi-receipt me-1"></i> Folio
+                    </a>
+                    <a href="{% url 'check_out' stay.pk %}" class="btn btn-sm btn-danger flex-fill py-1">
+                        <i class="bi bi-box-arrow-right me-1"></i> Check Out
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-door-closed fs-2 text-secondary d-block mb-1"></i>
+                <div class="fw-semibold">No active in-house guests</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
