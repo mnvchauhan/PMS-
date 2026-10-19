@@ -100,32 +100,21 @@
                     <i class="bi bi-tags-fill"></i>
                     <span>Room Types & Rates</span>
                 </a>
-                {% if user.is_staff %}
                 <a href="/admin/" target="_blank" class="nav-link-custom">
                     <i class="bi bi-shield-lock-fill"></i>
                     <span>Django Admin</span>
                 </a>
-                {% endif %}
             </nav>
 
             <div class="sidebar-footer">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="trainee-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: #d97706;">
-                            {{ user.username|slice:":2"|upper }}
-                        </div>
-                        <div class="overflow-hidden">
-                            <div class="text-white text-truncate fw-semibold small" style="max-width: 125px;">
-                                {{ user.get_full_name|default:user.username }}
-                            </div>
-                            <div class="text-warning small" style="font-size: 0.7rem;">
-                                {% if user.is_superuser %}Admin / Manager{% else %}GSA Front Desk{% endif %}
-                            </div>
-                        </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="trainee-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: #d97706;">
+                        <i class="bi bi-building"></i>
                     </div>
-                    <a href="{% url 'logout' %}" class="text-secondary text-decoration-none" title="Log out">
-                        <i class="bi bi-box-arrow-right fs-5"></i>
-                    </a>
+                    <div>
+                        <div class="text-white fw-semibold small">Grand Horizon Hotel</div>
+                        <div class="text-warning small" style="font-size: 0.7rem;">Front Office PMS</div>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -155,20 +144,9 @@
                         <i class="bi bi-grid-3x3-gap"></i> Room Rack
                     </a>
 
-                    <div class="dropdown">
-                        <button class="btn btn-light btn-sm dropdown-toggle border d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle text-primary"></i>
-                            <span class="d-none d-sm-inline">{{ user.username }}</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                            <li><h6 class="dropdown-header">Front Desk Account</h6></li>
-                            {% if user.is_staff %}
-                            <li><a class="dropdown-item" href="/admin/" target="_blank"><i class="bi bi-gear me-2"></i>Django Admin</a></li>
-                            {% endif %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Log Out</a></li>
-                        </ul>
-                    </div>
+                    <a href="/admin/" target="_blank" class="btn btn-sm btn-outline-secondary d-none d-md-inline-flex align-items-center gap-1">
+                        <i class="bi bi-shield-lock"></i> Admin
+                    </a>
                 </div>
             </header>
 

@@ -148,10 +148,8 @@ STORAGES = {
     },
 }
 
-# Authentication URLs
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard'
-LOGOUT_REDIRECT_URL = 'login'
+# Authentication disabled - direct access
+
 
 # Bootstrap Alert Message Mapping
 from django.contrib.messages import constants as messages

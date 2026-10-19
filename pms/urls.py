@@ -2,10 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Dashboard & Auth
+    # Dashboard
     path('', views.dashboard, name='dashboard'),
-    path('login/', views.pms_login, name='login'),
-    path('logout/', views.pms_logout, name='logout'),
 
     # Rooms & Room Rack
     path('rooms/', views.room_list, name='room_list'),

@@ -4,7 +4,6 @@ from decimal import Decimal
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -75,7 +74,6 @@ def pms_logout(request):
 # 1. FRONT OFFICE DASHBOARD
 # ==========================================
 
-@login_required
 def dashboard(request):
     today = date.today()
 
@@ -135,7 +133,6 @@ def dashboard(request):
 # 2. ROOM MANAGEMENT & ROOM RACK
 # ==========================================
 
-@login_required
 def room_list(request):
     rooms = Room.objects.select_related('room_type').all()
 
@@ -169,7 +166,6 @@ def room_list(request):
     return render(request, 'pms/room_list.html', context)
 
 
-@login_required
 def room_matrix(request):
     """Front Desk visual Room Rack grouped by floor with 1-click status actions."""
     floors = Room.objects.values_list('floor', flat=True).distinct().order_by('floor')
@@ -203,7 +199,6 @@ def room_matrix(request):
     return render(request, 'pms/room_matrix.html', context)
 
 
-@login_required
 def room_create(request):
     if request.method == 'POST':
         form = RoomForm(request.POST)
@@ -217,7 +212,6 @@ def room_create(request):
     return render(request, 'pms/room_form.html', {'form': form, 'title': 'Add New Room'})
 
 
-@login_required
 def room_update(request, pk):
     room = get_object_or_404(Room, pk=pk)
     if request.method == 'POST':
@@ -232,7 +226,6 @@ def room_update(request, pk):
     return render(request, 'pms/room_form.html', {'form': form, 'room': room, 'title': f"Edit Room {room.room_number}"})
 
 
-@login_required
 def room_clean_toggle(request, pk):
     """1-click Housekeeping update: from CLEANING / DIRTY -> AVAILABLE / CLEAN."""
     room = get_object_or_404(Room, pk=pk)
@@ -250,7 +243,6 @@ def room_clean_toggle(request, pk):
 
 
 # Room Types
-@login_required
 def room_type_list(request):
     types = RoomType.objects.annotate(room_count=Count('rooms')).all()
     if request.method == 'POST':
@@ -265,7 +257,6 @@ def room_type_list(request):
     return render(request, 'pms/room_type_list.html', {'room_types': types, 'form': form})
 
 
-@login_required
 def room_type_update(request, pk):
     rt = get_object_or_404(RoomType, pk=pk)
     if request.method == 'POST':
@@ -283,7 +274,6 @@ def room_type_update(request, pk):
 # 3. GUEST MANAGEMENT
 # ==========================================
 
-@login_required
 def guest_list(request):
     guests = Guest.objects.all()
 
@@ -305,7 +295,6 @@ def guest_list(request):
     return render(request, 'pms/guest_list.html', context)
 
 
-@login_required
 def guest_create(request):
     if request.method == 'POST':
         form = GuestForm(request.POST)
@@ -322,7 +311,6 @@ def guest_create(request):
     return render(request, 'pms/guest_form.html', {'form': form, 'title': 'Register New Guest'})
 
 
-@login_required
 def guest_detail(request, pk):
     guest = get_object_or_404(Guest, pk=pk)
     stays = guest.stays.select_related('room', 'invoice').all()
@@ -339,7 +327,6 @@ def guest_detail(request, pk):
     return render(request, 'pms/guest_detail.html', context)
 
 
-@login_required
 def guest_update(request, pk):
     guest = get_object_or_404(Guest, pk=pk)
     if request.method == 'POST':
@@ -357,7 +344,6 @@ def guest_update(request, pk):
 # 4. RESERVATION MANAGEMENT
 # ==========================================
 
-@login_required
 def reservation_list(request):
     reservations = Reservation.objects.select_related('guest', 'room_type', 'assigned_room').all()
 
@@ -387,7 +373,6 @@ def reservation_list(request):
     return render(request, 'pms/reservation_list.html', context)
 
 
-@login_required
 def reservation_create(request):
     initial = {
         'check_in_date': date.today(),
@@ -419,7 +404,6 @@ def reservation_create(request):
     return render(request, 'pms/reservation_form.html', {'form': form, 'title': 'Create New Reservation'})
 
 
-@login_required
 def reservation_detail(request, pk):
     res = get_object_or_404(
         Reservation.objects.select_related('guest', 'room_type', 'assigned_room', 'created_by'),
@@ -429,7 +413,6 @@ def reservation_detail(request, pk):
     return render(request, 'pms/reservation_detail.html', context)
 
 
-@login_required
 def reservation_cancel(request, pk):
     res = get_object_or_404(Reservation, pk=pk)
     if request.method == 'POST':
@@ -449,7 +432,6 @@ def reservation_cancel(request, pk):
 # 5. FRONT DESK CHECK-IN WORKFLOWS
 # ==========================================
 
-@login_required
 def arrivals_list(request):
     """Today's arrivals list for front office GSAs."""
     target_date = request.GET.get('date', date.today().isoformat())
@@ -466,7 +448,6 @@ def arrivals_list(request):
     return render(request, 'pms/arrivals_list.html', context)
 
 
-@login_required
 @transaction.atomic
 def check_in_reservation(request, pk):
     """Check-in an existing confirmed reservation."""
@@ -545,7 +526,6 @@ def check_in_reservation(request, pk):
     })
 
 
-@login_required
 @transaction.atomic
 def walk_in_check_in(request):
     """Fast walk-in check-in without advance reservation."""
@@ -641,7 +621,6 @@ def walk_in_check_in(request):
 # 6. IN-HOUSE GUESTS & CHECK-OUT WORKFLOW
 # ==========================================
 
-@login_required
 def in_house_list(request):
     """All active guests currently staying in the hotel."""
     stays = Stay.objects.filter(status='ACTIVE').select_related('guest', 'room', 'room__room_type', 'invoice')
@@ -664,7 +643,6 @@ def in_house_list(request):
     return render(request, 'pms/in_house_list.html', context)
 
 
-@login_required
 def departures_list(request):
     """Departures due today or specific date."""
     target_date = request.GET.get('date', date.today().isoformat())
@@ -681,7 +659,6 @@ def departures_list(request):
     return render(request, 'pms/departures_list.html', context)
 
 
-@login_required
 @transaction.atomic
 def check_out(request, pk):
     """
@@ -773,7 +750,6 @@ def check_out(request, pk):
 # 7. BILLING, PAYMENTS & PRINTABLE FOLIO
 # ==========================================
 
-@login_required
 def invoice_detail(request, pk):
     """Detailed Guest Folio with line items, payments, and quick charge entry."""
     invoice = get_object_or_404(
@@ -796,7 +772,6 @@ def invoice_detail(request, pk):
     return render(request, 'pms/invoice_detail.html', context)
 
 
-@login_required
 def add_invoice_item(request, pk):
     """Add extra charge (Room Service, Laundry, etc.) to an active invoice."""
     invoice = get_object_or_404(Invoice, pk=pk)
@@ -813,7 +788,6 @@ def add_invoice_item(request, pk):
     return redirect('invoice_detail', pk=invoice.pk)
 
 
-@login_required
 def add_payment(request, pk):
     """Record payment against invoice."""
     invoice = get_object_or_404(Invoice, pk=pk)
@@ -835,7 +809,6 @@ def add_payment(request, pk):
 # 8. GUEST REQUESTS & SHIFT HANDOVER
 # ==========================================
 
-@login_required
 def guest_request_list(request):
     requests_qs = GuestRequest.objects.select_related('room', 'guest').all()
     status_filter = request.GET.get('status', '').strip()
@@ -859,7 +832,6 @@ def guest_request_list(request):
     return render(request, 'pms/guest_request_list.html', context)
 
 
-@login_required
 def guest_request_update_status(request, pk):
     req = get_object_or_404(GuestRequest, pk=pk)
     new_status = request.POST.get('status')
@@ -872,7 +844,6 @@ def guest_request_update_status(request, pk):
     return redirect('guest_request_list')
 
 
-@login_required
 def shift_handover_list(request):
     handovers = ShiftHandover.objects.select_related('handed_over_by', 'acknowledged_by').all()
 
@@ -899,7 +870,6 @@ def shift_handover_list(request):
 # 9. REPORTS & CSV EXPORTS
 # ==========================================
 
-@login_required
 def reports_hub(request):
     today = date.today()
     start_date = request.GET.get('start_date', (today - timedelta(days=7)).isoformat())
@@ -941,7 +911,6 @@ def reports_hub(request):
     return render(request, 'pms/reports_hub.html', context)
 
 
-@login_required
 def export_arrivals_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="arrivals_report_{date.today()}.csv"'
@@ -970,7 +939,6 @@ def export_arrivals_csv(request):
     return response
 
 
-@login_required
 def export_departures_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="departures_report_{date.today()}.csv"'
@@ -996,7 +964,6 @@ def export_departures_csv(request):
     return response
 
 
-@login_required
 def export_revenue_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="revenue_report_{date.today()}.csv"'
